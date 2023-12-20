@@ -72,34 +72,19 @@ private addDirectionalLight(x: number, y: number, z: number, intensity: number):
   }
 
   private draw_earth(): void {
-    // Instantiate a loader for .mtl files
     const mtlLoader = new MTLLoader();
-    
-    // Set the path to the directory containing the .mtl file and the textures
     mtlLoader.setPath('assets/');
-    
-    // Load the .mtl file
     mtlLoader.load('EarthSphere.mtl', (materials) => {
-      // Preload the materials
       materials.preload();
       
-      // Instantiate the OBJLoader and set the materials to be used
       const objLoader = new OBJLoader();
       objLoader.setMaterials(materials);
-      
-      // Set the path to the directory containing the .obj file
       objLoader.setPath('assets/');
       
-      // Load the .obj file
       objLoader.load('EarthSphere.obj', (object) => {
-        // Apply the scale and position transformations
         object.scale.set(15, 15, 15);
         object.position.set(0, 0, 0);
-  
-        // Assign the loaded object to a class property if needed
         this.earth = object;
-  
-        // Add the object to the scene
         this.scene.add(this.earth);
       });
     });
