@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import * as THREE from 'three';
 import { ArcballControls } from 'three/examples/jsm/controls/ArcballControls';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 
 @Component({
@@ -40,7 +41,7 @@ export class EarthSceneComponent implements OnInit, AfterViewInit {
     this.scene.background = new THREE.Color(0, 0, 0);
     
     // intensity
-    this.ambient_light = new THREE.AmbientLight("white", 5.0); 
+    this.ambient_light = new THREE.AmbientLight("white", 2.0); 
     this.scene.add(this.ambient_light);
 
     const lightIntensity = 0;
@@ -71,24 +72,36 @@ private addDirectionalLight(x: number, y: number, z: number, intensity: number):
   }
 
   private draw_earth(): void {
-    const loader = new OBJLoader();
-    loader.load('assets/tp2_sphere.obj', (object) => {
-      object.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          mesh.material = new THREE.MeshPhongMaterial({
-            map: this.planetTexture,
-            color: 0xffffff,
-            specular: 0x000000,
-            shininess: 0
-          });
-        }
-      });
-
+    // Instantiate a loader for .mtl files
+    const mtlLoader = new MTLLoader();
+    
+    // Set the path to the directory containing the .mtl file and the textures
+    mtlLoader.setPath('assets/');
+    
+    // Load the .mtl file
+    mtlLoader.load('EarthSphere.mtl', (materials) => {
+      // Preload the materials
+      materials.preload();
+      
+      // Instantiate the OBJLoader and set the materials to be used
+      const objLoader = new OBJLoader();
+      objLoader.setMaterials(materials);
+      
+      // Set the path to the directory containing the .obj file
+      objLoader.setPath('assets/');
+      
+      // Load the .obj file
+      objLoader.load('EarthSphere.obj', (object) => {
+        // Apply the scale and position transformations
         object.scale.set(15, 15, 15);
         object.position.set(0, 0, 0);
+  
+        // Assign the loaded object to a class property if needed
         this.earth = object;
+  
+        // Add the object to the scene
         this.scene.add(this.earth);
+      });
     });
   }
 
@@ -112,10 +125,10 @@ private addDirectionalLight(x: number, y: number, z: number, intensity: number):
     
     this.createScene();
     
-    const textureLoader = new THREE.TextureLoader();
-    this.planetTexture = textureLoader.load('assets/tp2_texture_planete.jpg', (texture) => {
-      texture.minFilter = THREE.LinearFilter;
-    });
+    //const textureLoader = new THREE.TextureLoader();
+    //this.planetTexture = textureLoader.load('assets/NaturalEarth.png', (texture) => {
+      //texture.minFilter = THREE.LinearFilter;
+    //});
 
     this.camera = new THREE.PerspectiveCamera(45, this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight, 0.1, 1000);
     this.camera.position.set(2, 2, 50);
