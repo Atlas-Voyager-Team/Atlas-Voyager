@@ -76,7 +76,7 @@ export class WikiCommunicationService {
     async getCountriesByYear(year: string) {
         const endpoint = 'https://query.wikidata.org/sparql';
         const query = `
-                SELECT DISTINCT ?item ?itemLabel ?inception ?dissolved ?coor ?capitalLabel ?wikiArticleUrl
+                SELECT DISTINCT ?item ?itemLabel ?inception ?dissolved ?coordinates ?capitalLabel ?wikiArticleUrl
                 WHERE
                 {
                 VALUES ?countryclass { wd:Q3024240 wd:Q6256 wd:Q3624078 }
@@ -86,7 +86,7 @@ export class WikiCommunicationService {
                 FILTER (?inception < "${year}-01-01T00:00:00Z"^^xsd:dateTime)
                 FILTER (?dissolved >= "${year}-01-01T00:00:00Z"^^xsd:dateTime || !Bound(?dissolved) )
                 SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
-                OPTIONAL { ?item wdt:P625 ?coor }
+                OPTIONAL { ?item wdt:P625 ?coordinates }
                 OPTIONAL {
                     ?sitelink schema:about ?item;
                             schema:isPartOf <https://en.wikipedia.org/>;
@@ -99,14 +99,24 @@ export class WikiCommunicationService {
             `;
 
         try {
-            console.log('before axios');
-            return await axios.get(endpoint, {
-                params: {
-                    query: query,
-                },
+            const response = await axios.get(endpoint, {
+                params: { query: query },
             });
+
+            const countries = response.data.results.bindings.map((item: any) => {
+                return {
+                    id: item.item.value,
+                    name: item.itemLabel.value,
+                    inception: item.inception.value,
+                    dissolved: item.dissolved ? item.dissolved.value : null,
+                    coordinates: item.coor ? item.coor.value : null,
+                    capital: item.capitalLabel ? item.capitalLabel.value : null,
+                    wikiArticleUrl: item.wikiArticleUrl ? item.wikiArticleUrl.value : null,
+                };
+            });
+
+            return countries;
         } catch (error) {
-            console.error('Error fetching countries:', error);
             throw error;
         }
     }
