@@ -5,6 +5,17 @@ import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { Raycaster, Vector2 } from 'three';
 
+import { WikidataCommunicationService } from '../../services/wikidata-communication.service';
+
+
+interface HistoricalEvent {
+  // ... other properties of the event
+  coordinates?: {
+    lat: number;
+    lon: number;
+  } | string;  // Add 'string' if the coordinates could also be a string.
+}
+
 @Component({
   selector: 'app-explore-page',
   templateUrl: './explore-page.component.html',
@@ -30,11 +41,18 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
 
   private textBoxCreated: boolean = false;
 
+  
+
   @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
 
-  constructor() { }
+  constructor(
+    private wikiDataService: WikidataCommunicationService, 
+  ) { }
+
+  
 
   ngOnInit(): void {
+    this.fetchEventsAndPlaceMarkers("1944"); // Example year
   }
 
 
@@ -181,6 +199,20 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
     this.controls = new ArcballControls(this.camera, this.renderer.domElement, this.scene);
     this.controls.setGizmosVisible(false);
     this.animate(); 
+  }
+
+  fetchEventsAndPlaceMarkers(year: string): void {
+    this.wikiDataService.getEventsByYear(year).subscribe(
+      (events: HistoricalEvent[]) => {
+        events.forEach(event => {
+          // Check if coordinates is an object and has lat and lon properties
+          if (event.coordinates && typeof event.coordinates === 'object') {
+            this.addMarker(event.coordinates.lat, event.coordinates.lon);
+          }
+        });
+      },
+      error => console.error('Error fetching events:', error)
+    );
   }
 
   // Example usage
