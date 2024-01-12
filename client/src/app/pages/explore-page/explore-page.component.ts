@@ -6,11 +6,11 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { Raycaster, Vector2 } from 'three';
 
 @Component({
-  selector: 'app-earth-scene',
-  templateUrl: './earth-scene.component.html',
-  styleUrls: ['./earth-scene.component.scss']
+  selector: 'app-explore-page',
+  templateUrl: './explore-page.component.html',
+  styleUrls: ['./explore-page.component.scss']
 })
-export class EarthSceneComponent implements OnInit, AfterViewInit {
+export class ExplorePageComponent implements OnInit, AfterViewInit {
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
