@@ -19,9 +19,7 @@ export class EarthSceneComponent implements OnInit, AfterViewInit {
   private camera_light!: THREE.DirectionalLight;
   private last_render: number = Date.now();
 
-  private planetTexture!: THREE.Texture;
   private earth!: THREE.Object3D;
-  private directionalLight!: THREE.DirectionalLight;
   private tx: number = 0;
 
   private earthRadius = 15; 
@@ -29,6 +27,8 @@ export class EarthSceneComponent implements OnInit, AfterViewInit {
   private raycaster = new Raycaster();
   private mouse = new Vector2();
   private interactiveObjects = new Array<THREE.Object3D>(); 
+
+  private textBoxCreated: boolean = false;
 
   @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
 
@@ -53,7 +53,7 @@ export class EarthSceneComponent implements OnInit, AfterViewInit {
     this.addDirectionalLight(0, -1, 0, lightIntensity); // below
 
     this.camera = new THREE.PerspectiveCamera(45, this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight, 0.1, 1000);
-    this.camera.position.set(2, 2, 20);
+    this.camera.position.set(2, 2, 50);
     this.camera.lookAt(this.scene.position);
     this.scene.add(this.camera);
     
@@ -67,10 +67,39 @@ export class EarthSceneComponent implements OnInit, AfterViewInit {
   }
 
 
-private addDirectionalLight(x: number, y: number, z: number, intensity: number): void {
+  private addDirectionalLight(x: number, y: number, z: number, intensity: number): void {
     const directionalLight = new THREE.DirectionalLight(0xffffff, intensity);
     directionalLight.position.set(x, y, z);
     this.scene.add(directionalLight);
+  }
+
+  private addMarker(lat: number, lon: number): void {
+    const position = this.latLonToSphere(lat, lon, this.earthRadius);
+    console.log(`Marker Position: ${position.x}, ${position.y}, ${position.z}`);
+
+    const markerGeometry = new THREE.SphereGeometry(0.01, 32, 32);
+    const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+
+    // Apply the inverse of the Earth object's world matrix to the position
+    this.earth.updateMatrixWorld(true);
+    const inverseMatrix = new THREE.Matrix4().copy(this.earth.matrixWorld).invert();
+    position.applyMatrix4(inverseMatrix);
+
+    // Marker added as a child to earth
+    marker.position.set(position.x, position.y, position.z);
+    this.earth.add(marker);
+    marker.userData['isMarker'] = true;
+    console.log('Marker added to Earth');
+}
+
+  private latLonToSphere(lat: number, lon: number, radius: number): THREE.Vector3 {
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+    const x = -(radius * Math.sin(phi) * Math.cos(theta));
+    const y = radius * Math.cos(phi);
+    const z = radius * Math.sin(phi) * Math.sin(theta);
+    return new THREE.Vector3(x, y, z);
   }
 
   private draw_earth(): void {
@@ -88,6 +117,8 @@ private addDirectionalLight(x: number, y: number, z: number, intensity: number):
         object.position.set(0, 0, 0);
         this.earth = object;
         this.scene.add(this.earth);
+
+        this.addMarker(51.5, 0.13); // Example coordinates
       });
     });
   }
@@ -106,70 +137,56 @@ private addDirectionalLight(x: number, y: number, z: number, intensity: number):
     this.renderer.render(this.scene, this.camera);
   }
 
+  onDocumentMouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    const intersects = this.raycaster.intersectObject(this.earth, true);
+    const markerIntersects = intersects.filter(intersect => intersect.object.userData['isMarker']);
+  
+    if (markerIntersects.length > 0) {
+      this.showOrUpdateTextBox(markerIntersects[0]);
+    }
+  }
+  
+
+  showOrUpdateTextBox(intersect: THREE.Intersection): void {
+    const marker = intersect.object;
+  
+    // Update the content of the text box
+    const textBox = document.getElementById('info-text-box') as HTMLDivElement;
+    const contentBox = textBox.getElementsByClassName('content-box')[0] as HTMLDivElement;
+    contentBox.innerHTML = marker.userData['info'];
+    textBox.style.display = 'block';
+  
+    // Bind close button event
+    const closeButton = textBox.getElementsByClassName('close-button')[0] as HTMLButtonElement;
+    closeButton.onclick = () => this.hideTextBox();
+  }
+  
+  hideTextBox(): void {
+    const textBox = document.getElementById('info-text-box') as HTMLDivElement;
+    textBox.style.display = 'none';
+  }
+
   private init(): void {
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvasRef.nativeElement, antialias: true });
     this.renderer.setSize(this.canvasRef.nativeElement.clientWidth, this.canvasRef.nativeElement.clientHeight);
     
     this.createScene();
-    
-    this.camera = new THREE.PerspectiveCamera(45, this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight, 0.1, 1000);
-    this.camera.position.set(2, 2, 50);
-    this.scene.add(this.camera);
 
     this.controls = new ArcballControls(this.camera, this.renderer.domElement, this.scene);
     this.controls.setGizmosVisible(false);
     this.animate(); 
-
-    this.renderer.domElement.addEventListener('click', this.onMouseClick.bind(this), false);
-
-  }
-
-  private addMarker(lat: number, lon: number): void {
-    const position = this.latLonToSphere(lat, lon, this.earthRadius);
-    const markerGeometry = new THREE.SphereGeometry(0.1, 32, 32);
-    const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-    marker.position.set(position.x, position.y, position.z);
-    this.scene.add(marker);
-    this.interactiveObjects.push(marker); // Add the marker to the list of interactive objects
-  }
-
-  private latLonToSphere(lat: number, lon: number, radius: number): THREE.Vector3 {
-    const phi = (90 - lat) * (Math.PI / 180);
-    const theta = (lon + 180) * (Math.PI / 180);
-    const x = -(radius * Math.sin(phi) * Math.cos(theta));
-    const y = radius * Math.cos(phi);
-    const z = radius * Math.sin(phi) * Math.sin(theta);
-    return new THREE.Vector3(x, y, z);
-  }
-
-  private onMouseClick(event: MouseEvent): void {
-    // Calculate mouse position in normalized device coordinates (-1 to +1) for both components
-    this.mouse.x = (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1;
-    this.mouse.y = - (event.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
-
-    // Update the picking ray with the camera and mouse position
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    // Calculate objects intersecting the picking ray
-    const intersects = this.raycaster.intersectObjects(this.interactiveObjects);
-
-    if (intersects.length > 0) {
-      // Assuming the first object is the one we're interested in
-      this.showPopup(intersects[0].object);
-    }
-  }
-
-  private showPopup(object: THREE.Object3D): void {
-    // Your logic to show a pop-up window
-    // For example, you can set some property that you use with Angular's *ngIf directive to show a pop-up
-    alert(`Clicked on marker at: ${object.position}`);
   }
 
   // Example usage
   ngAfterViewInit(): void {
     this.init();
-    this.addMarker(51.5, 0.13); 
+    this.renderer.domElement.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
   }
 }
 

@@ -27,3 +27,42 @@
     max-width: 100%;
     word-wrap: break-word; 
   }
+
+  .scene-container {
+    position: relative; /* This is necessary for absolute positioning of children */
+    width: 1024px; /* Adjust to match your canvas width */
+    height: 576px; /* Adjust to match your canvas height */
+    margin: auto; /* Center the container if needed */
+    /* Other styles as necessary */
+  }
+  
+  .info-text-box {
+    position: absolute;
+    top: 10px; /* Adjust this value to place the box lower or higher */
+    right: 10px; /* This will place the box 10px from the right edge of .scene-container */
+    background-color: white;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    z-index: 10; /* Ensure it's above other elements */
+    max-width: 300px; /* Set a max-width for the text box */
+    box-sizing: border-box; /* Ensure padding is included in the width */
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 20px;
+  }
+  
+  
+
+  .content-box {
+    margin-top: 30px; 
+  }
+  
+  
