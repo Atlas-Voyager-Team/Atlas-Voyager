@@ -6,10 +6,11 @@ import { EarthComponent } from './components/earth/earth.component';
 import { CommonModule } from '@angular/common';
 import { AppRoutingModule } from './app.routes';
 import { MainPageComponent } from './pages/main-page/main-page.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
     declarations: [AppComponent, ExplorePageComponent, EarthComponent, MainPageComponent],
-    imports: [BrowserModule, CommonModule, AppRoutingModule],
+    imports: [BrowserModule, CommonModule, AppRoutingModule, HttpClientModule],
     providers: [],
     bootstrap: [AppComponent],
 })
