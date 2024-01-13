@@ -6,15 +6,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { Raycaster, Vector2 } from 'three';
 
 import { WikidataCommunicationService } from '../../services/wikidata-communication.service';
-
-
-interface HistoricalEvent {
-  // ... other properties of the event
-  coordinates?: {
-    lat: number;
-    lon: number;
-  } | string;  // Add 'string' if the coordinates could also be a string.
-}
+import { HistoricalEvents } from '../../interfaces/historical-events';
 
 @Component({
   selector: 'app-explore-page',
@@ -40,7 +32,7 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
   private interactiveObjects = new Array<THREE.Object3D>(); 
 
   private textBoxCreated: boolean = false;
-
+  selectedYear: string = "1944"; 
   
 
   @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
@@ -49,18 +41,12 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
     private wikiDataService: WikidataCommunicationService, 
   ) { }
 
-  
-
-  ngOnInit(): void {
-    this.fetchEventsAndPlaceMarkers("1944"); // Example year
+  ngOnInit(): void { 
   }
-
 
   private createScene(): void {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0, 0, 0);
-    
-    // intensity
     this.ambient_light = new THREE.AmbientLight("white", 2.0); 
     this.scene.add(this.ambient_light);
 
@@ -91,7 +77,7 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
     this.scene.add(directionalLight);
   }
 
-  private addMarker(lat: number, lon: number): void {
+  private addMarker(lat: number, lon: number, eventInfo: HistoricalEvents): void {
     const position = this.latLonToSphere(lat, lon, this.earthRadius);
     console.log(`Marker Position: ${position.x}, ${position.y}, ${position.z}`);
 
@@ -103,6 +89,13 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
     this.earth.updateMatrixWorld(true);
     const inverseMatrix = new THREE.Matrix4().copy(this.earth.matrixWorld).invert();
     position.applyMatrix4(inverseMatrix);
+
+    marker.userData = {
+      isMarker: true,
+      title: eventInfo.itemLabel, 
+      description: eventInfo.itemDescription,
+      url: eventInfo.wikiArticleUrl
+    };
 
     // Marker added as a child to earth
     marker.position.set(position.x, position.y, position.z);
@@ -135,8 +128,6 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
         object.position.set(0, 0, 0);
         this.earth = object;
         this.scene.add(this.earth);
-
-        this.addMarker(51.5, 0.13); // Example coordinates
       });
     });
   }
@@ -175,12 +166,16 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
     const marker = intersect.object;
   
     // Update the content of the text box
+    const title = marker.userData['title'];
+    const description = marker.userData['description'];
+    const url = marker.userData['url'];
+
+    // Update the content of the text box with event information
     const textBox = document.getElementById('info-text-box') as HTMLDivElement;
     const contentBox = textBox.getElementsByClassName('content-box')[0] as HTMLDivElement;
-    contentBox.innerHTML = marker.userData['info'];
+    contentBox.innerHTML = `<h1>${title}</h1><p>${description}</p><a href="${url}" target="_blank">Read more</a>`;
     textBox.style.display = 'block';
   
-    // Bind close button event
     const closeButton = textBox.getElementsByClassName('close-button')[0] as HTMLButtonElement;
     closeButton.onclick = () => this.hideTextBox();
   }
@@ -201,24 +196,67 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
     this.animate(); 
   }
 
+  showLoadingScreen(): void {
+    const loadingScreen = document.getElementById('loadingScreen') as HTMLDivElement;
+    loadingScreen.style.display = 'flex';
+  }
+
+  hideLoadingScreen(): void {
+    const loadingScreen = document.getElementById('loadingScreen') as HTMLDivElement;
+    loadingScreen.style.display = 'none';
+  }
+
   fetchEventsAndPlaceMarkers(year: string): void {
+    this.showLoadingScreen(); // Show loading screen when loading starts
     this.wikiDataService.getEventsByYear(year).subscribe(
-      (events: HistoricalEvent[]) => {
+      (events: HistoricalEvents[]) => { 
         events.forEach(event => {
-          // Check if coordinates is an object and has lat and lon properties
-          if (event.coordinates && typeof event.coordinates === 'object') {
-            this.addMarker(event.coordinates.lat, event.coordinates.lon);
+          console.log(event);
+          // Check if coordinates is a string and extract lat and lon
+          if (event.coordinates && typeof event.coordinates === 'string') {
+            const coords = event.coordinates.match(/Point\(([^ ]+) ([^ ]+)\)/);
+            if (coords) {
+              const lon = parseFloat(coords[1]);
+              const lat = parseFloat(coords[2]);
+              this.addMarker(lat, lon, event); 
+            }
           }
+          this.hideLoadingScreen(); 
         });
       },
       error => console.error('Error fetching events:', error)
     );
   }
+  
+  onYearSelectionChange(event: Event): void {
+    this.selectedYear = (event.target as HTMLInputElement).value;
+    document.getElementById('selectedYear')!.innerText = this.selectedYear;
+  }
+
+  onConfirmYear(): void {
+    this.clearMarkers();
+    this.fetchEventsAndPlaceMarkers(this.selectedYear);
+  }
+
+  clearMarkers(): void {
+    this.earth.children.forEach(child => {
+      if (child.userData['isMarker']) {
+        this.earth.remove(child);
+      }
+    });
+  }
+  
 
   // Example usage
   ngAfterViewInit(): void {
     this.init();
     this.renderer.domElement.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
+
+    const yearRangeElement = document.getElementById('yearRange') as HTMLInputElement;
+    yearRangeElement.addEventListener('input', this.onYearSelectionChange.bind(this));
+
+    const confirmYearButton = document.getElementById('confirmYearButton') as HTMLButtonElement;
+    confirmYearButton.addEventListener('click', this.onConfirmYear.bind(this));
   }
 }
 
