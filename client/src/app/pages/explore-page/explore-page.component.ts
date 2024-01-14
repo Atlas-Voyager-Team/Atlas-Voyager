@@ -239,10 +239,10 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
   }
 
   clearMarkers(): void {
-    this.earth.children.forEach(child => {
-      if (child.userData['isMarker']) {
-        this.earth.remove(child);
-      }
+    const markersToRemove = this.earth.children.filter(child => child.userData['isMarker']);
+  
+    markersToRemove.forEach(marker => {
+      this.earth.remove(marker);
     });
   }
   
