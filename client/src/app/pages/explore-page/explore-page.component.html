@@ -1,2 +1,28 @@
-<p>explore-page works!</p>
-<app-earth></app-earth>
+<body>
+    <div class="scene-container">
+      <h1>Explore</h1>
+      <canvas #canvas width="1024" height="576"></canvas>
+      <div class="year-selector">
+        <input type="range" id="yearRange" min="1600" max="2024" value="1945">
+        <span id="selectedYear">1945</span>
+        <button id="confirmYearButton">Confirm Year</button>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggleAnimation">
+        <span>Animate</span>
+      </label>
+    </div>
+
+    <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-content">
+      Loading, please wait...
+    </div>
+  </div>
+
+    <div id="info-text-box" class="info-text-box">
+      <div class="content-box"></div>
+      <button class="close-button">×</button>
+    </div>
+  </body>
+  
