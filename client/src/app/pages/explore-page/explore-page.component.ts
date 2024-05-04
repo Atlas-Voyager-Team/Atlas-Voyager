@@ -164,26 +164,24 @@ export class ExplorePageComponent implements OnInit, AfterViewInit {
 
   showOrUpdateTextBox(intersect: THREE.Intersection): void {
     const marker = intersect.object;
-  
-    // Update the content of the text box
     const title = marker.userData['title'];
     const description = marker.userData['description'];
     const url = marker.userData['url'];
 
-    // Update the content of the text box with event information
     const textBox = document.getElementById('info-text-box') as HTMLDivElement;
     const contentBox = textBox.getElementsByClassName('content-box')[0] as HTMLDivElement;
-    contentBox.innerHTML = `<h1>${title}</h1><p>${description}</p><a href="${url}" target="_blank">Read more</a>`;
-    textBox.style.display = 'block';
-  
-    const closeButton = textBox.getElementsByClassName('close-button')[0] as HTMLButtonElement;
-    closeButton.onclick = () => this.hideTextBox();
+    contentBox.innerHTML = `<h2>Information about selected point</h2>
+                            <h5>${title}</h5>
+                            <p>${description}</p>
+                            <a href="${url}" target="_blank">Read more</a>`;
+    textBox.style.display = 'block'; // Ensure it is now visible
   }
-  
+
   hideTextBox(): void {
-    const textBox = document.getElementById('info-text-box') as HTMLDivElement;
-    textBox.style.display = 'none';
+      const textBox = document.getElementById('info-text-box') as HTMLDivElement;
+      textBox.style.display = 'none'; 
   }
+
 
   private init(): void {
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvasRef.nativeElement, antialias: true });
