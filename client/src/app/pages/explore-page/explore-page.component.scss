@@ -1,0 +1,159 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0;
+  background-color: #e2e1e1;
+  min-height: 100vh; 
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column; /* Stack vertically */
+  min-height: 100vh; /* Minimum height of the viewport */
+  background-color: #e2e1e1;
+}
+
+canvas {
+  width: 90%;
+  max-width: 100%; 
+  height: auto; 
+  border: 2px solid #eee; 
+  border-radius: 8px;
+}
+
+.scene-container {
+  width: 100%; 
+  max-width: none; 
+  height: auto; 
+  background-color: #f9f9f9; 
+  margin: 20px auto; 
+  padding: 20px; 
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1); 
+  border-radius: 10px; 
+}
+
+.main-container {
+  flex: 1; 
+  width: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.my-year-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0; 
+  flex-wrap: wrap;
+}
+
+.year-display {
+  font-weight: bold;
+  color: #007bff; 
+  margin-left: 15px;
+}
+
+.btn-primary {
+  margin-left: 15px; 
+}
+
+.loading-screen {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-content {
+  text-align: center;
+  color: white;
+  font-size: 20px;
+}
+
+.navbar {
+  width: 100%;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1); 
+  border-radius: 10px; 
+}
+
+.navbar-brand {
+  font-weight: bold;
+  color: #007bff !important;
+}
+
+.navbar-brand:hover {
+  font-weight: bold;
+  color: #0064cf !important;
+}
+
+.info-text-box {
+  width: 100%; 
+  margin-top: 20px;
+  background-color: #fff;
+  padding: 15px;
+  border: 1px solid #ccc;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1); 
+  border-radius: 10px; 
+  display: none;
+  overflow: hidden;
+  text-align: left;
+}
+
+.content-box h2 {
+  font-size: 10px; 
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.content-box h1, .content-box p, .content-box a {
+  font-size: 14px; 
+}
+
+.content-box a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.content-box a:hover {
+  text-decoration: underline;
+}
+
+.close-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.footer {
+  width: 100%;
+  padding: 10px 0;
+  background-color: #e2e1e1;
+  text-align: center;
+  clear: both; 
+}
+
+.footer span {
+  color: #333;
+  font-size: 14px;
+}
+
+.form-check {
+  padding: 10px 0;
+  font-weight: bold;
+}

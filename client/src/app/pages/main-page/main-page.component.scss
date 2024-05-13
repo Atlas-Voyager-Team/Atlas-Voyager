@@ -1,0 +1,41 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%; 
+    background-color: #e2e1e1;
+  }
+  
+  .container {
+    text-align: center; 
+  }
+  
+  #logo-image {
+    width: 30%; 
+  }
+  
+  #main-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .nav-button {
+    font-size: 1.25rem; 
+    padding: 0.5rem 1.5rem; 
+    margin: 0.5rem; 
+    width: 80%;
+    max-width: 300px; 
+  }
+  
+  .btn-primary {
+    background-color: #007bff; 
+    border-color: #007bff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0056b3; 
+    border-color: #0056b3;
+  }
+  
