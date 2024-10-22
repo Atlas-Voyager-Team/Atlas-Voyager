@@ -2,12 +2,17 @@
 
 ## Overview
 
-**Atlas Voyager** is a software project designed to provide [insert a brief description of what the project does]. This project aims to [highlight key features or goals]. Built with a focus on [key technologies or concepts, e.g., modularity, efficiency, user experience], it offers [briefly mention some use cases].
+**Atlas Voyager** is an interactive web application that brings history to life by displaying a 3D Earth model where users can explore historical events. By selecting a specific year, users can see markers across the globe representing significant events. Clicking on these markers reveals detailed information about each event, sourced from reliable data via the Wikipedia APIs. The project is designed to make learning history engaging, intuitive, and visually interactive, leveraging modern web technologies like Angular and NestJS.
 
 ## Features
-- **Feature 1**: Describe the feature
-- **Feature 2**: Describe the feature
-- **Feature 3**: Describe the feature
+**Atlas Voyager** is a dynamic web application that combines **Angular** and **NestJS** to create an interactive 3D Earth model. Users can select a year and see markers at locations of historical events worldwide. Clicking on these markers reveals details about each event. This early-stage project aims to make learning history engaging and interactive.
+
+### Technologies Used:
+- **Angular**: Front-end framework for building the user interface.
+- **NestJS**: Back-end framework for handling server-side logic.
+- **Wikipedia APIs**: Fetches data for historical events.
+- **TypeScript**: Language used for both client and server development.
+- **HTML5 & CSS**: For structuring and styling the application.
 
 ## Getting Started
 
